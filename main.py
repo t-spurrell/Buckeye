@@ -13,7 +13,7 @@ CONFIG = load_config()
 ninja_rmm_conn = Ninjarmm(CONFIG['ninjarmm']['base_url'], CONFIG['ninjarmm']['id'], CONFIG['ninjarmm']['secret'])
 #Auth to Halo api
 halo_api_conn = HaloAPI(CONFIG['halo_api']['base_url'], CONFIG['halo_api']['id'], CONFIG['halo_api']['secret'])
-#Auth to InvoiceNinja
+#Auth to InvoiceNinja api
 invoice_ninja_conn = InvoiceNinja(CONFIG['invoice_ninja']['base_url'])
 
 

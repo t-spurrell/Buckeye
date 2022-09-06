@@ -1,10 +1,11 @@
 import json
-import os
-import sys
+import pathlib
 
-SCRIPTDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-#CONFIGPATH = os.path.join(SCRIPTDIR,'config.json')
-CONFIGPATH ='/Users/trevor/PycharmProjects/buckeye/config.json'
+
+SCRIPTDIR = pathlib.Path().resolve()
+CONFIGPATH = pathlib.Path().joinpath(SCRIPTDIR, 'config.json')
+# SCRIPTDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+# CONFIGPATH = os.path.join(SCRIPTDIR,'config.json')
 
 
 def load_config():
