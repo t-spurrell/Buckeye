@@ -58,8 +58,8 @@ class HaloAPI:
         if response.ok:
             site_data = response.json()
             phone_num = site_data['phonenumber']
-            main_contact_name = site_data['maincontact_name']
-            main_contact_user_id = site_data['maincontact_id']
+            #main_contact_name = site_data['maincontact_name']
+            #main_contact_user_id = site_data['maincontact_id']
             address = {
                 'street': site_data['delivery_address']['line1'],
                 'city': site_data['delivery_address']['line2'],
@@ -67,7 +67,7 @@ class HaloAPI:
                 'zip_code': site_data['delivery_address']['postcode']
             }
             #print(phone_num, main_contact_user_id, main_contact_name, address)
-            return phone_num, main_contact_user_id, main_contact_name, address
+            return phone_num, address
 
 
 
