@@ -1,5 +1,6 @@
 from requests import get,post,put
 from configuration import load_config
+import json
 
 CONFIG = load_config()
 
@@ -21,11 +22,6 @@ class InvoiceNinja:
         return put(url, json=data, headers=headers)
 
     def create_new_client(self, name, halo_id, website, address, phone):
-        # if ' ' in main_contact.strip():
-        #     first_name, last_name = main_contact.split()
-        # else:
-        #     first_name = main_contact
-        #     last_name = ' '
         payload = {
             "name": name,
             "website": website,
@@ -43,15 +39,11 @@ class InvoiceNinja:
         return result
 
     def update_client(self, invoice_ninja_client_id, name, website, address, phone, main_contact, email):
-        # active_clients = self.get_clients()
-        # for client in active_clients:
-        #     if client['private_notes'] == str(halo_id):
-        #         invoice_ninja_client_id = client['id']
-        if ' ' in main_contact.strip():
-            first_name, last_name = main_contact.split()
-        else:
-            first_name = main_contact
-            last_name = ' '
+        # if ' ' in main_contact.strip():
+        #     first_name, last_name = main_contact.split()
+        # else:
+        #     first_name = main_contact
+        #     last_name = ' '
         payload = {
             "name": name,
             "website": website,
@@ -60,28 +52,24 @@ class InvoiceNinja:
             "state": address['state'],
             "postal_code": address['zip_code'],
             "phone": phone,
-            "contacts": [
-                {
-                    "first_name": first_name,
-                    "last_name": last_name,
-                    "email": email,
-                    "phone": phone
-                }
-            ]
+            # "contacts": [
+            #     {
+            #         "first_name": first_name,
+            #         "last_name": last_name,
+            #         "email": email,
+            #         "phone": phone
+            #     }
+            # ]
         }
         result = self.put_data(f'clients/{invoice_ninja_client_id}', payload)
         return result
 
     def create_user(self, invoice_ninja_id, first_name, last_name, email, phone):
+        users = self.get_users_for_client(invoice_ninja_id)
+        new_user = {'first_name': first_name, 'last_name': last_name, 'email': email, 'phone': phone}
+        users.append(new_user)
         payload = {
-            "contacts": [
-                {
-                    "first_name": first_name,
-                    "last_name": last_name,
-                    "email": email,
-                    "phone": phone
-                }
-            ]
+            "contacts": users
         }
         result = self.put_data(f'clients/{invoice_ninja_id}', payload)
         return result
@@ -106,10 +94,24 @@ class InvoiceNinja:
             active_clients = [client for client in clients if client['is_deleted'] is False]
             return active_clients
 
+    def get_users_for_client(self,invoice_ID):
+        url = f'{self.host}/clients/{invoice_ID}'
+        headers = {'X-API-Token': self.token, 'Content-Type': 'application/json'}
+        response = get(url=url, headers=headers)
+        if response.ok:
+            data = response.json()
+            users = data['data']['contacts']
+            return users
+            #print(users)
+            # s = json.dumps(data,indent=4)
+            # print(s)
 
 
-# t = InvoiceNinja(CONFIG['invoice_ninja']['base_url'])
-# print(t.get_invoice_ninja_id('21'))
+
+t = InvoiceNinja(CONFIG['invoice_ninja']['base_url'])
+#ninja = t.get_users_for_client('vbmZ8pY3dY')
+t.create_user('vbmZ8pY3dY','tt','tt','tt@tt','12345')
+#print(t.get_invoice_ninja_id('21'))
 #
 # client = t.get_invoice_ninja_id()
 # if client is not None:

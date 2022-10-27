@@ -125,15 +125,8 @@ async def create_user(request: dict = Body(), credentials: HTTPBasicCredentials 
             invoice_ninja_id = invoice_ninja_conn.get_invoice_ninja_id(halo_id)
             print('client created in invoiceninja')
             #print(f'creating client {client_name} {halo_id} {website} {address} {phone_num}')
-        print(f"lets add a user!")
         invoice_add_user_result = invoice_ninja_conn.create_user(invoice_ninja_id, first_name, last_name, email, phone)
         print(invoice_add_user_result)
-
-
-
-        #print(f'Error no such client with halo id of {halo_id} found in InvoiceNinja')
-
-        #print(halo_id,first_name,last_name,email,phone)
 
 
 @app.post("/update_user", status_code=status.HTTP_201_CREATED)
