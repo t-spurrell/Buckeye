@@ -1,4 +1,4 @@
-from requests import get,post,put
+from requests import get, post, put
 from configuration import load_config
 import json
 
@@ -38,7 +38,7 @@ class InvoiceNinja:
         result = self.post_data('clients', payload)
         return result
 
-    def update_client(self, invoice_ninja_client_id, name, website, address, phone, main_contact, email):
+    def update_client(self, invoice_ninja_client_id, name, website, address, phone, main_contact=None, email=None):
         # if ' ' in main_contact.strip():
         #     first_name, last_name = main_contact.split()
         # else:
@@ -64,9 +64,10 @@ class InvoiceNinja:
         result = self.put_data(f'clients/{invoice_ninja_client_id}', payload)
         return result
 
-    def create_user(self, invoice_ninja_id, first_name, last_name, email, phone):
+    def create_user(self, invoice_ninja_id, first_name, last_name, email, phone, halo_user_id):
         users = self.get_users_for_client(invoice_ninja_id)
-        new_user = {'first_name': first_name, 'last_name': last_name, 'email': email, 'phone': phone}
+        new_user = {'first_name': first_name, 'last_name': last_name, 'email': email,
+                    'phone': phone, 'custom_value1': halo_user_id}
         users.append(new_user)
         payload = {
             "contacts": users
@@ -74,12 +75,22 @@ class InvoiceNinja:
         result = self.put_data(f'clients/{invoice_ninja_id}', payload)
         return result
 
+    def update_user(self, invoice_ninja_id, first_name, last_name, email, phone, halo_user_id):
+        users = self.get_users_for_client(invoice_ninja_id)
+        for user in users:
+            if user['custom_value1'] == halo_user_id:
+                user['first_name'] = first_name
+                user['last_name'] = last_name
+                user['email'] = email
+                user['phone'] = phone
+        payload = {"contacts": users}
+        result = self.put_data(f'clients/{invoice_ninja_id}', payload)
+        return result
+
     def get_invoice_ninja_id(self, halo_id):
         active_clients = self.get_clients()
-        #print(active_clients)
         for client in active_clients:
             if client['private_notes'] == str(halo_id):
-                #print(client['id'])
                 return client['id']
         return None
 
@@ -87,43 +98,23 @@ class InvoiceNinja:
         url = f'{self.host}/clients'
         headers = {'X-API-Token': self.token, 'Content-Type': 'application/json'}
         response = get(url=url, headers=headers)
-        #print(response)
         if response.ok:
             data = response.json()
             clients = data['data']
             active_clients = [client for client in clients if client['is_deleted'] is False]
             return active_clients
 
-    def get_users_for_client(self,invoice_ID):
-        url = f'{self.host}/clients/{invoice_ID}'
+    def get_users_for_client(self,invoice_id):
+        url = f'{self.host}/clients/{invoice_id}'
         headers = {'X-API-Token': self.token, 'Content-Type': 'application/json'}
         response = get(url=url, headers=headers)
         if response.ok:
             data = response.json()
             users = data['data']['contacts']
             return users
-            #print(users)
-            # s = json.dumps(data,indent=4)
-            # print(s)
 
 
 
-t = InvoiceNinja(CONFIG['invoice_ninja']['base_url'])
-#ninja = t.get_users_for_client('vbmZ8pY3dY')
-t.create_user('vbmZ8pY3dY','tt','tt','tt@tt','12345')
-#print(t.get_invoice_ninja_id('21'))
-#
-# client = t.get_invoice_ninja_id()
-# if client is not None:
-#     print(client)
-# else:
-#     print('no such client')
 
 
 
-# f = t.create_new_client('test1','101010','testweb.com',{'street':'1212 my street','city':'test city','state':'MD','zip_code':'21784'},'1128553498','Bruce','bruce@main.com')
-# print(f)
-#t.update_client(20)
-# a = t.get_clients()
-# for i in a:
-#     print(i)

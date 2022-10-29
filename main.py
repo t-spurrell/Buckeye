@@ -37,7 +37,7 @@ async def create_client(request: dict = Body(), credentials: HTTPBasicCredential
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Basic"},
         )
-    print("landed at the create endpoint!")
+    print("landed at the create_client endpoint!")
     client_name = request['client']['name']
     halo_id = int(request['client']['id'])
     website = request['client']['website']
@@ -100,6 +100,7 @@ async def create_user(request: dict = Body(), credentials: HTTPBasicCredentials 
 
     if request['user']['name'] != 'General User':
         halo_id = int(request['user']['site']['client_id'])
+        halo_user_id = str(request['user']['id'])
         first_name = request['user']['firstname']
         if request['user']['surname'] is not None:
             last_name = request['user']['surname']
@@ -125,7 +126,8 @@ async def create_user(request: dict = Body(), credentials: HTTPBasicCredentials 
             invoice_ninja_id = invoice_ninja_conn.get_invoice_ninja_id(halo_id)
             print('client created in invoiceninja')
             #print(f'creating client {client_name} {halo_id} {website} {address} {phone_num}')
-        invoice_add_user_result = invoice_ninja_conn.create_user(invoice_ninja_id, first_name, last_name, email, phone)
+        invoice_add_user_result = invoice_ninja_conn.create_user(invoice_ninja_id, first_name,
+                                                                 last_name, email, phone, halo_user_id)
         print(invoice_add_user_result)
 
 
@@ -139,5 +141,20 @@ async def update_user(request: dict = Body(), credentials: HTTPBasicCredentials 
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Basic"},
         )
-    print(request)
+
+    if request['user']['name'] != 'General User':
+        halo_id = int(request['user']['site']['client_id'])
+        halo_user_id = str(request['user']['id'])
+        first_name = request['user']['firstname']
+        if request['user']['surname'] is not None:
+            last_name = request['user']['surname']
+        else:
+            last_name = ''
+        email = request['user']['emailaddress']
+        phone = request['user']['phonenumber_preferred']
+        invoice_ninja_id = invoice_ninja_conn.get_invoice_ninja_id(halo_id)
+
+        invoice_update_user_result = invoice_ninja_conn.update_user(invoice_ninja_id, first_name,
+                                                                    last_name, email, phone, halo_user_id)
+        print(invoice_update_user_result)
 
