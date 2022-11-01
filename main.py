@@ -67,12 +67,28 @@ async def update_client(request: dict = Body(), credentials: HTTPBasicCredential
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Basic"},
         )
-    client_name = request['client']['name']
-    halo_id = int(request['client']['id'])
-    website = request['client']['website']
-    site_id = request['client']['main_site_id']
-    phone_num, main_contact_user_id, main_contact_name, address = halo_api_conn.get_site_details(site_id)
-    email = halo_api_conn.get_user_email(main_contact_user_id)
+    print('update client endpoint')
+    if request['event'] == 'client updated':
+        print('event = client update')
+        client_name = request['client']['name']
+        halo_id = int(request['client']['id'])
+        website = request['client']['website']
+        site_id = request['client']['main_site_id']
+        #phone_num, main_contact_user_id, main_contact_name, address = halo_api_conn.get_site_details(site_id)
+        phone_num, address = halo_api_conn.get_site_details(site_id)
+        #email = halo_api_conn.get_user_email(main_contact_user_id)
+    if request['event'] == 'site updated':
+        print('event = site update')
+        client_name = request['site']['client']['name']
+        halo_id = int(request['site']['client']['id'])
+        website = request['site']['client']['website']
+        address = {
+            'street': request['site']['delivery_address']['line1'],
+            'city': request['site']['delivery_address']['line2'],
+            'state': request['site']['delivery_address']['line3'],
+            'zip_code': request['site']['delivery_address']['postcode']
+        }
+        phone_num = request['site']['phonenumber']
 
     #Update NinjaRMM
     rmm_result = ninja_rmm_conn.update_org(client_name, halo_id)
@@ -81,7 +97,7 @@ async def update_client(request: dict = Body(), credentials: HTTPBasicCredential
     #Update Invoice Ninja
     invoice_ninja_id = invoice_ninja_conn.get_invoice_ninja_id(halo_id)
     if invoice_ninja_id is not None:
-        invoice_result = invoice_ninja_conn.update_client(invoice_ninja_id, client_name, website, address, phone_num, main_contact_name, email)
+        invoice_result = invoice_ninja_conn.update_client(invoice_ninja_id, client_name, website, address, phone_num)
         print(invoice_result)
     else:
         print(f'Error no such client with halo id of {halo_id} found in InvoiceNinja')
@@ -99,6 +115,7 @@ async def create_user(request: dict = Body(), credentials: HTTPBasicCredentials 
         )
 
     if request['user']['name'] != 'General User':
+        print('create user endpoint')
         halo_id = int(request['user']['site']['client_id'])
         halo_user_id = str(request['user']['id'])
         first_name = request['user']['firstname']
@@ -143,6 +160,7 @@ async def update_user(request: dict = Body(), credentials: HTTPBasicCredentials 
         )
 
     if request['user']['name'] != 'General User':
+        print('update user endpoint')
         halo_id = int(request['user']['site']['client_id'])
         halo_user_id = str(request['user']['id'])
         first_name = request['user']['firstname']

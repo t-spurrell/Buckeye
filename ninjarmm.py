@@ -42,14 +42,18 @@ class Ninjarmm:
 
     def update_org(self, name, halo_id):
         orgs = self.get_orgs()
+        org_exists = False
         for org in orgs:
             if 'description' in org and org['description'] == str(halo_id):
+                org_exists = True
                 ninja_id = org['id']
                 payload = {
                     "name": name
                           }
                 result = self.patch_data(f'api/v2/organization/{ninja_id}', payload)
                 return result
+        if not org_exists:
+            self.create_new_org(name, halo_id)
 
     def get_orgs(self):
         url = f'{self.host}/v2/organizations'
@@ -61,8 +65,4 @@ class Ninjarmm:
             #print(org_data)
             return org_data
 
-# CONFIG = load_config()
-# t = Ninjarmm('https://app.ninjarmm.com', CONFIG['ninjarmm']['id'], CONFIG['ninjarmm']['secret'])
-#
-# t.update_org('trevor',123)
 

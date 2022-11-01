@@ -50,7 +50,7 @@ class HaloAPI:
             return email
 
     def get_site_details(self, site_id):
-        print("GET SITE DETAILS FUNCTION CALLED")
+        #print("GET SITE DETAILS FUNCTION CALLED")
         url = f"{self.host}/site/{site_id}"
         headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
         response = get(url=url, headers=headers)
@@ -68,17 +68,3 @@ class HaloAPI:
             }
             #print(phone_num, main_contact_user_id, main_contact_name, address)
             return phone_num, address
-
-
-
-
-
-# halo = HaloAPI("https://buckeyecloud.halopsa.com/api",CONFIG['halo_api']['id'],CONFIG['halo_api']['secret'])
-# phone, user_id, contact, addy = halo.get_site_details(28)
-# print(phone)
-# print(contact)
-# print(addy)
-# print(type(addy))
-# print(addy['street'])
-# print(addy['state'])
-#halo.get_user_email(49)

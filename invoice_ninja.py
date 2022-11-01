@@ -44,6 +44,7 @@ class InvoiceNinja:
         # else:
         #     first_name = main_contact
         #     last_name = ' '
+        users = self.get_users_for_client(invoice_ninja_client_id)
         payload = {
             "name": name,
             "website": website,
@@ -52,14 +53,8 @@ class InvoiceNinja:
             "state": address['state'],
             "postal_code": address['zip_code'],
             "phone": phone,
-            # "contacts": [
-            #     {
-            #         "first_name": first_name,
-            #         "last_name": last_name,
-            #         "email": email,
-            #         "phone": phone
-            #     }
-            # ]
+            "contacts": users
+
         }
         result = self.put_data(f'clients/{invoice_ninja_client_id}', payload)
         return result
@@ -77,12 +72,19 @@ class InvoiceNinja:
 
     def update_user(self, invoice_ninja_id, first_name, last_name, email, phone, halo_user_id):
         users = self.get_users_for_client(invoice_ninja_id)
+        user_exist = False
         for user in users:
             if user['custom_value1'] == halo_user_id:
+                user_exist = True
                 user['first_name'] = first_name
                 user['last_name'] = last_name
                 user['email'] = email
                 user['phone'] = phone
+        if not user_exist:
+            print(f'the user trying to be updated: {first_name} is not in invoiceninja')
+            new_user = {'first_name': first_name, 'last_name': last_name, 'email': email,
+                        'phone': phone, 'custom_value1': halo_user_id}
+            users.append(new_user)
         payload = {"contacts": users}
         result = self.put_data(f'clients/{invoice_ninja_id}', payload)
         return result
