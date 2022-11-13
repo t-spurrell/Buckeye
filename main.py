@@ -176,3 +176,25 @@ async def update_user(request: dict = Body(), credentials: HTTPBasicCredentials 
                                                                     last_name, email, phone, halo_user_id)
         print(invoice_update_user_result)
 
+
+@app.post("/delete_user", status_code=status.HTTP_201_CREATED)
+async def delete_user(request: dict = Body(), credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(credentials.username, CONFIG['halo_webhook']['username'])
+    correct_password = secrets.compare_digest(credentials.password, CONFIG['halo_webhook']['password'])
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    deleted_user_id = request['object_id']
+    details = request['message']
+    print(deleted_user_id)
+    client_name = details[details.find("(")+1:details.find(")")].split(':')[0]
+    print(client_name)
+    halo_id = halo_api_conn.get_id_from_name(client_name)
+    print(halo_id)
+    invoice_ninja_id = invoice_ninja_conn.get_invoice_ninja_id(halo_id)
+    print(invoice_ninja_id)
+    invoice_ninja_conn.delete_user(invoice_ninja_id, deleted_user_id)

@@ -4,3 +4,4 @@ config.json
 .idea/misc.xml
 .idea/modules.xml
 .idea/inspectionProfines/profiles_settings.xml
+.DS_Store

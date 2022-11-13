@@ -89,6 +89,23 @@ class InvoiceNinja:
         result = self.put_data(f'clients/{invoice_ninja_id}', payload)
         return result
 
+    def delete_user(self, invoice_ninja_id, halo_user_id):
+        print("Inside ninja delete function")
+        users = self.get_users_for_client(invoice_ninja_id)
+        print(users)
+        user_exist = False
+        for i, user in enumerate(users):
+            if user['custom_value1'] == str(halo_user_id):
+                user_exist = True
+                print(f'removing user {user["first_name"]}')
+                users.pop(i)
+                break
+        if not user_exist:
+            print(f'user {halo_user_id} does not exist in invoice ninja for client {invoice_ninja_id}')
+        payload = {"contacts": users}
+        result = self.put_data(f'clients/{invoice_ninja_id}', payload)
+        return result
+
     def get_invoice_ninja_id(self, halo_id):
         active_clients = self.get_clients()
         for client in active_clients:
@@ -106,7 +123,7 @@ class InvoiceNinja:
             active_clients = [client for client in clients if client['is_deleted'] is False]
             return active_clients
 
-    def get_users_for_client(self,invoice_id):
+    def get_users_for_client(self, invoice_id):
         url = f'{self.host}/clients/{invoice_id}'
         headers = {'X-API-Token': self.token, 'Content-Type': 'application/json'}
         response = get(url=url, headers=headers)
@@ -117,6 +134,8 @@ class InvoiceNinja:
 
 
 
-
+# t = InvoiceNinja(CONFIG['invoice_ninja']['base_url'])
+# u = t.get_users_for_client('1aKrGVyReQ')
+# print(u)
 
 

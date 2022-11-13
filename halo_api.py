@@ -33,11 +33,12 @@ class HaloAPI:
         url = f"{self.host}/client"
         headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
         response = get(url=url, headers=headers)
-        print(response)
+        #print(response)
         if response.ok:
             client_data = response.json()
-            print(client_data)
-        return response
+            #print(client_data)
+            return client_data['clients']
+        #return response
 
     def get_user_email(self, user_id):
         print('GET EMAIL FUNCTION CALLED')
@@ -68,3 +69,11 @@ class HaloAPI:
             }
             #print(phone_num, main_contact_user_id, main_contact_name, address)
             return phone_num, address
+
+    def get_id_from_name(self, client_name):
+        client_list = self.get_clients()
+        for client in client_list:
+            if client["name"] == client_name:
+                return client['id']
+        return None
+
