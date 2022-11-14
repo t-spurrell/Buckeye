@@ -1,5 +1,4 @@
 from requests import get, post, put, patch
-from configuration import load_config
 
 
 class Ninjarmm:

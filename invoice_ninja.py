@@ -1,6 +1,5 @@
-from requests import get, post, put
+from requests import get, post, put, delete
 from configuration import load_config
-import json
 
 CONFIG = load_config()
 
@@ -39,11 +38,6 @@ class InvoiceNinja:
         return result
 
     def update_client(self, invoice_ninja_client_id, name, website, address, phone, main_contact=None, email=None):
-        # if ' ' in main_contact.strip():
-        #     first_name, last_name = main_contact.split()
-        # else:
-        #     first_name = main_contact
-        #     last_name = ' '
         users = self.get_users_for_client(invoice_ninja_client_id)
         payload = {
             "name": name,
@@ -58,6 +52,12 @@ class InvoiceNinja:
         }
         result = self.put_data(f'clients/{invoice_ninja_client_id}', payload)
         return result
+
+    def delete_client(self, invoice_ninja_id):
+        url = f'{self.host}/clients/{invoice_ninja_id}'
+        headers = {'X-API-Token': self.token, 'Content-Type': 'application/json'}
+        response = delete(url=url, headers=headers)
+        return response
 
     def create_user(self, invoice_ninja_id, first_name, last_name, email, phone, halo_user_id):
         users = self.get_users_for_client(invoice_ninja_id)
@@ -90,14 +90,11 @@ class InvoiceNinja:
         return result
 
     def delete_user(self, invoice_ninja_id, halo_user_id):
-        print("Inside ninja delete function")
         users = self.get_users_for_client(invoice_ninja_id)
-        print(users)
         user_exist = False
         for i, user in enumerate(users):
             if user['custom_value1'] == str(halo_user_id):
                 user_exist = True
-                print(f'removing user {user["first_name"]}')
                 users.pop(i)
                 break
         if not user_exist:
@@ -131,11 +128,5 @@ class InvoiceNinja:
             data = response.json()
             users = data['data']['contacts']
             return users
-
-
-
-# t = InvoiceNinja(CONFIG['invoice_ninja']['base_url'])
-# u = t.get_users_for_client('1aKrGVyReQ')
-# print(u)
 
 

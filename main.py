@@ -53,8 +53,6 @@ async def create_client(request: dict = Body(), credentials: HTTPBasicCredential
         phone_num, address = halo_api_conn.get_site_details(site_id)
         invoice_result = invoice_ninja_conn.create_new_client(client_name, halo_id, website, address, phone_num)
         print(invoice_result)
-    # string = json.dumps(request,indent=4)
-    # print(string)
 
 
 @app.post("/update_client", status_code=status.HTTP_201_CREATED)
@@ -103,6 +101,23 @@ async def update_client(request: dict = Body(), credentials: HTTPBasicCredential
         print(f'Error no such client with halo id of {halo_id} found in InvoiceNinja')
 
 
+@app.post("/delete_client", status_code=status.HTTP_201_CREATED)
+async def delete_client(request: dict = Body(), credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(credentials.username, CONFIG['halo_webhook']['username'])
+    correct_password = secrets.compare_digest(credentials.password, CONFIG['halo_webhook']['password'])
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    if request['event'] == 'client deleted':
+        halo_id = request['object_id']
+        invoice_ninja_id = invoice_ninja_conn.get_invoice_ninja_id(halo_id)
+        invoice_ninja_conn.delete_client(invoice_ninja_id)
+
+
 @app.post("/create_user", status_code=status.HTTP_201_CREATED)
 async def create_user(request: dict = Body(), credentials: HTTPBasicCredentials = Depends(security)):
     correct_username = secrets.compare_digest(credentials.username, CONFIG['halo_webhook']['username'])
@@ -115,7 +130,6 @@ async def create_user(request: dict = Body(), credentials: HTTPBasicCredentials 
         )
 
     if request['user']['name'] != 'General User':
-        print('create user endpoint')
         halo_id = int(request['user']['site']['client_id'])
         halo_user_id = str(request['user']['id'])
         first_name = request['user']['firstname']
@@ -160,7 +174,6 @@ async def update_user(request: dict = Body(), credentials: HTTPBasicCredentials 
         )
 
     if request['user']['name'] != 'General User':
-        print('update user endpoint')
         halo_id = int(request['user']['site']['client_id'])
         halo_user_id = str(request['user']['id'])
         first_name = request['user']['firstname']
@@ -190,11 +203,7 @@ async def delete_user(request: dict = Body(), credentials: HTTPBasicCredentials 
 
     deleted_user_id = request['object_id']
     details = request['message']
-    print(deleted_user_id)
     client_name = details[details.find("(")+1:details.find(")")].split(':')[0]
-    print(client_name)
     halo_id = halo_api_conn.get_id_from_name(client_name)
-    print(halo_id)
     invoice_ninja_id = invoice_ninja_conn.get_invoice_ninja_id(halo_id)
-    print(invoice_ninja_id)
     invoice_ninja_conn.delete_user(invoice_ninja_id, deleted_user_id)

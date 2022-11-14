@@ -1,6 +1,5 @@
 from requests import get, post, put, patch
 from configuration import load_config
-import json
 
 CONFIG = load_config()
 
@@ -33,12 +32,9 @@ class HaloAPI:
         url = f"{self.host}/client"
         headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
         response = get(url=url, headers=headers)
-        #print(response)
         if response.ok:
             client_data = response.json()
-            #print(client_data)
             return client_data['clients']
-        #return response
 
     def get_user_email(self, user_id):
         print('GET EMAIL FUNCTION CALLED')
@@ -51,23 +47,18 @@ class HaloAPI:
             return email
 
     def get_site_details(self, site_id):
-        #print("GET SITE DETAILS FUNCTION CALLED")
         url = f"{self.host}/site/{site_id}"
         headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
         response = get(url=url, headers=headers)
-        #print(response)
         if response.ok:
             site_data = response.json()
             phone_num = site_data['phonenumber']
-            #main_contact_name = site_data['maincontact_name']
-            #main_contact_user_id = site_data['maincontact_id']
             address = {
                 'street': site_data['delivery_address']['line1'],
                 'city': site_data['delivery_address']['line2'],
                 'state': site_data['delivery_address']['line3'],
                 'zip_code': site_data['delivery_address']['postcode']
             }
-            #print(phone_num, main_contact_user_id, main_contact_name, address)
             return phone_num, address
 
     def get_id_from_name(self, client_name):
