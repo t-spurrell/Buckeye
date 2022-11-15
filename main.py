@@ -115,7 +115,9 @@ async def delete_client(request: dict = Body(), credentials: HTTPBasicCredential
     if request['event'] == 'client deleted':
         halo_id = request['object_id']
         invoice_ninja_id = invoice_ninja_conn.get_invoice_ninja_id(halo_id)
-        invoice_ninja_conn.delete_client(invoice_ninja_id)
+        if invoice_ninja_id is not None:
+            print("deleting client")
+            invoice_ninja_conn.delete_client(invoice_ninja_id)
 
 
 @app.post("/create_user", status_code=status.HTTP_201_CREATED)
@@ -141,7 +143,9 @@ async def create_user(request: dict = Body(), credentials: HTTPBasicCredentials 
         phone = request['user']['phonenumber_preferred']
 
         invoice_ninja_id = invoice_ninja_conn.get_invoice_ninja_id(halo_id)
+        preexisting_client = True
         if invoice_ninja_id is None:
+            preexisting_client = False
             print('Got webhook to add user, but client does not exist in invoiceninja. Adding client now!')
             client_name = request['user']['site']['client']['name']
             website = request['user']['site']['client']['website']
@@ -160,6 +164,10 @@ async def create_user(request: dict = Body(), credentials: HTTPBasicCredentials 
         invoice_add_user_result = invoice_ninja_conn.create_user(invoice_ninja_id, first_name,
                                                                  last_name, email, phone, halo_user_id)
         print(invoice_add_user_result)
+        if not preexisting_client:
+            #remove default blank user created when a new client is made in invoice ninja
+            print('removing blank user from client creation')
+            invoice_ninja_conn.remove_blank_user(invoice_ninja_id)
 
 
 @app.post("/update_user", status_code=status.HTTP_201_CREATED)
@@ -206,4 +214,5 @@ async def delete_user(request: dict = Body(), credentials: HTTPBasicCredentials 
     client_name = details[details.find("(")+1:details.find(")")].split(':')[0]
     halo_id = halo_api_conn.get_id_from_name(client_name)
     invoice_ninja_id = invoice_ninja_conn.get_invoice_ninja_id(halo_id)
-    invoice_ninja_conn.delete_user(invoice_ninja_id, deleted_user_id)
+    if invoice_ninja_id is not None:
+        invoice_ninja_conn.delete_user(invoice_ninja_id, deleted_user_id)

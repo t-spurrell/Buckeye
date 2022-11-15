@@ -103,6 +103,16 @@ class InvoiceNinja:
         result = self.put_data(f'clients/{invoice_ninja_id}', payload)
         return result
 
+    def remove_blank_user(self, invoice_ninja_id):
+        users = self.get_users_for_client(invoice_ninja_id)
+        for i, user in enumerate(users):
+            if user['first_name'] == '' and user['last_name'] == '':
+                users.pop(i)
+                break
+        payload = {"contacts": users}
+        result = self.put_data(f'clients/{invoice_ninja_id}', payload)
+        return result
+
     def get_invoice_ninja_id(self, halo_id):
         active_clients = self.get_clients()
         for client in active_clients:
@@ -111,7 +121,7 @@ class InvoiceNinja:
         return None
 
     def get_clients(self):
-        url = f'{self.host}/clients'
+        url = f'{self.host}/clients?per_page=2000'
         headers = {'X-API-Token': self.token, 'Content-Type': 'application/json'}
         response = get(url=url, headers=headers)
         if response.ok:
